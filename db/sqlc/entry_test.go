@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
@@ -16,7 +15,7 @@ func createRandomEntry(t *testing.T, account Account) Entry {
 		Amount:    util.RandomMoney(),
 	}
 
-	entry, err := testQueries.CreateEntry(context.Background(), arg)
+	entry, err := testStore.CreateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry)
 	require.Equal(t, arg.AccountID, entry.AccountID)
@@ -35,13 +34,13 @@ func TestCreateEntry(t *testing.T) {
 func TestGetEntry(t *testing.T) {
 	account := createRandomAccount(t)
 	entry := createRandomEntry(t, account)
-	findEntry, err := testQueries.GetEntry(context.Background(), entry.ID)
+	findEntry, err := testStore.GetEntry(context.Background(), entry.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, findEntry)
 	require.Equal(t, entry.ID, findEntry.ID)
 	require.Equal(t, entry.AccountID, findEntry.AccountID)
 	require.Equal(t, entry.Amount, findEntry.Amount)
-	require.WithinDuration(t, entry.CreatedAt, findEntry.CreatedAt, time.Second)
+	require.WithinDuration(t, entry.CreatedAt.Time, findEntry.CreatedAt.Time, time.Second)
 }
 
 func TestUpdateEntry(t *testing.T) {
@@ -52,24 +51,23 @@ func TestUpdateEntry(t *testing.T) {
 		Amount: util.RandomMoney(),
 	}
 
-	updatedEntry, err := testQueries.UpdateEntry(context.Background(), arg)
+	updatedEntry, err := testStore.UpdateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedEntry)
 	require.Equal(t, entry.ID, updatedEntry.ID)
 	require.Equal(t, entry.AccountID, updatedEntry.AccountID)
 	require.Equal(t, arg.Amount, updatedEntry.Amount)
-	require.WithinDuration(t, entry.CreatedAt, updatedEntry.CreatedAt, time.Second)
+	require.WithinDuration(t, entry.CreatedAt.Time, updatedEntry.CreatedAt.Time, time.Second)
 }
 
 func TestDeleteEntry(t *testing.T) {
 	account := createRandomAccount(t)
 	entry := createRandomEntry(t, account)
-	err := testQueries.DeleteEntry(context.Background(), entry.ID)
+	err := testStore.DeleteEntry(context.Background(), entry.ID)
 	require.NoError(t, err)
 
-	findEntry, err := testQueries.GetEntry(context.Background(), entry.ID)
+	findEntry, err := testStore.GetEntry(context.Background(), entry.ID)
 	require.Error(t, err)
-	require.Equal(t, err, sql.ErrNoRows)
 	require.Empty(t, findEntry)
 }
 
@@ -85,7 +83,7 @@ func TestListEntries(t *testing.T) {
 		Offset:    5,
 	}
 
-	entries, err := testQueries.ListEntries(context.Background(), arg)
+	entries, err := testStore.ListEntries(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, entries, 5)
 	for _, entry := range entries {

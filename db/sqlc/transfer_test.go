@@ -16,7 +16,7 @@ func createRandomTransfer(t *testing.T, fromAccount Account, toAccount Account) 
 		Amount:        util.RandomMoney(),
 	}
 
-	transfer, err := testQueries.CreateTransfer(context.Background(), arg)
+	transfer, err := testStore.CreateTransfer(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, transfer)
 	require.Equal(t, arg.FromAccountID, transfer.FromAccountID)
@@ -39,14 +39,14 @@ func TestGetTransfer(t *testing.T) {
 	toAccount := createRandomAccount(t)
 	transfer := createRandomTransfer(t, fromAccount, toAccount)
 
-	findTransfer, err := testQueries.GetTransfer(context.Background(), transfer.ID)
+	findTransfer, err := testStore.GetTransfer(context.Background(), transfer.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, findTransfer)
 	require.Equal(t, transfer.ID, findTransfer.ID)
 	require.Equal(t, transfer.FromAccountID, findTransfer.FromAccountID)
 	require.Equal(t, transfer.ToAccountID, findTransfer.ToAccountID)
 	require.Equal(t, transfer.Amount, findTransfer.Amount)
-	require.WithinDuration(t, transfer.CreatedAt, findTransfer.CreatedAt, time.Second)
+	require.WithinDuration(t, transfer.CreatedAt.Time, findTransfer.CreatedAt.Time, time.Second)
 }
 
 func TestListTransfers(t *testing.T) {
@@ -63,7 +63,7 @@ func TestListTransfers(t *testing.T) {
 		Offset:        5,
 	}
 
-	transfers, err := testQueries.ListTransfers(context.Background(), arg)
+	transfers, err := testStore.ListTransfers(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, transfers, 5)
 	for _, transfer := range transfers {
