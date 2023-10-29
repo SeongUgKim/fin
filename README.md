@@ -38,4 +38,9 @@ type CreateAccountParam struct {
 	Currency string `json:"currency" binding:"required,oneof=USD,EUR,CAD"`
 }
 ```
-  
+
+### GoMock
+- `MockStore`: struct that implements all required functions of the `Store` interface
+- `MockStoreMockRecorder`: also has functions with the same name and the same number of args.
+  - But the types of args are diff -> just general `interface` type
+- 
