@@ -6,22 +6,24 @@ import (
 	"os"
 	"testing"
 
+	"bank-grpc/util"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
-)
-
-const (
-	dbDriver = "postgres"
-	dbSource = "postgresql://root:secret@localhost:5433/simple_bank?sslmode=disable"
 )
 
 var testStore Store
 
 func TestMain(m *testing.M) {
-	connPool, err := pgxpool.New(context.Background(), dbSource)
+	config, err := util.LoadConfig("../..")
+	if err != nil {
+		log.Fatal("cannot laod config:", err)
+	}
+
+	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
+	defer connPool.Close()
 
 	testStore = NewStore(connPool)
 	os.Exit(m.Run())
